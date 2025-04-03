@@ -41,16 +41,48 @@ For complete setup instructions, please see our [Tailwind Integration Guide](htt
 # code structure
 
 ```
-my-crud-app/
-├── src/
-│   ├── api/              # Elysia API server
-│   │   ├── db.ts         # Kysely + Xata setup
-│   │   └── server.ts     # Elysia CRUD routes
-│   ├── pages/            # Astro frontend
-│   │   └── index.astro   # Main page with CRUD UI
-│   └── xata.ts           # Xata client (auto-generated)
-├── .env                  # Environment variables
-├── astro.config.mjs      # Astro config
+.
+├── .astro
+│   ├── collections
+│   ├── content-assets.mjs
+│   ├── content-modules.mjs
+│   ├── content.d.ts
+│   ├── data-store.json
+│   ├── settings.json
+│   └── types.d.ts
+├── .env
+├── .env.example
+├── .gitignore
+├── .xata
+│   ├── migrations
+│   │   ├── .ledger
+│   │   ├── mig_cv5b57a000vn51j3sm60_2574386a.json
+│   │   ├── mig_cvn44krjvveebe59jb00_69ecf93c.json
+│   │   ├── mig_cvn4533jvveebe59jb10_e3a3acda.json
+│   │   └── mig_cvn4abjjvveebe59jb20_361795b3.json
+│   └── version
+│       └── compatibility.json
+├── .xatarc
+├── LICENSE.md
+├── README.md
+├── astro.config.mjs
+├── bun.lockb
 ├── package.json
-└── bun.lockb             # Bun lockfile
+├── public
+│   └── favicon.svg
+├── src
+│   ├── components
+│   │   └── Button.astro
+│   ├── db
+│   │   └── db.ts
+│   ├── layouts
+│   │   └── main.astro
+│   ├── pages
+│   │   ├── [...slugs].ts
+│   │   ├── index.astro
+│   │   └── markdown-page.md
+│   ├── styles
+│   │   └── global.css
+│   └── xata.ts
+└── tsconfig.json
 ```
