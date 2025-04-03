@@ -1,25 +1,89 @@
 ---
-import '../styles/global.css';
-// Component Imports
-import Button from '../components/Button.astro';
-
-// Full Astro Component Syntax:
-// https://docs.astro.build/basics/astro-components/
 ---
 
+<!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro + TailwindCSS</title>
-	</head>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRUD App</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .user-list { margin-top: 20px; }
+    form { display: flex; gap: 10px; margin-bottom: 20px; }
+    button { padding: 5px 10px; }
+  </style>
+</head>
+<body>
+  <h1>User CRUD</h1>
 
-	<body>
-		<div class="grid place-items-center h-screen content-center">
-			<Button>Tailwind Button in Astro!</Button>
-			<a href="/markdown-page" class="p-4 underline">Markdown is also supported...</a>
-		</div>
-	</body>
+  <!-- Create Form -->
+  <form id="createForm">
+    <input type="text" id="name" placeholder="Name" required />
+    <input type="email" id="email" placeholder="Email" required />
+    <button type="submit">Add User</button>
+  </form>
+
+  <!-- User List -->
+  <div class="user-list" id="userList"></div>
+
+  <script>
+	const API_URL = 'http://localhost:4321/users';
+    const apiUrl = `${API_URL}`;
+    const userList = document.getElementById('userList');
+    const createForm = document.getElementById('createForm');
+
+    // Fetch and display users
+    async function fetchUsers() {
+      const res = await fetch(apiUrl);
+      const users = await res.json();
+      userList.innerHTML = users.map(user => `
+        <div>
+          <strong>${user.id}</strong> (${user.username})
+          <button onclick="updateUser('${user.id}')">Edit</button>
+          <button onclick="deleteUser('${user.id}')">Delete</button>
+        </div>
+      `).join('');
+    }
+
+    // Create user
+    createForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email }),
+      });
+      createForm.reset();
+      fetchUsers();
+    });
+
+    // Update user
+    window.updateUser = async (id) => {
+      const name = prompt('New name:');
+      const email = prompt('New email:');
+      if (name && email) {
+        await fetch(`${apiUrl}/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email }),
+        });
+        fetchUsers();
+      }
+    };
+
+    // Delete user
+    window.deleteUser = async (id) => {
+      if (confirm('Are you sure?')) {
+        await fetch(`${apiUrl}/${id}`, { method: 'DELETE' });
+        fetchUsers();
+      }
+    };
+
+    // Initial fetch
+    fetchUsers();
+  </script>
+</body>
 </html>
