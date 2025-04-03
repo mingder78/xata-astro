@@ -10,8 +10,9 @@ const tables = [
   {
     name: "users",
     columns: [
-      { name: "username", type: "string", unique: true },
+      { name: "name", type: "string", unique: true },
       { name: "password", type: "string" },
+      { name: "email", type: "text" },
     ],
     revLinks: [{ column: "user", table: "items" }],
   },

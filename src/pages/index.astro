@@ -39,7 +39,7 @@
       const users = await res.json();
       userList.innerHTML = users.map(user => `
         <div>
-          <strong>${user.id}</strong> (${user.username})
+          <strong>${user.id}</strong> (${user.name}) 
           <button onclick="updateUser('${user.id}')">Edit</button>
           <button onclick="deleteUser('${user.id}')">Delete</button>
         </div>
