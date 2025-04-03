@@ -1,10 +1,10 @@
-// @ts-check
 import { defineConfig } from 'astro/config';
-import node from '@astrojs/node';
+import vercel from "@astrojs/vercel";
+import react from "@astrojs/react";
 
+// https://astro.build/config
 export default defineConfig({
-  output: 'server', // or 'hybrid' if mixing static and SSR
-  adapter: node({
-    mode: 'standalone' // or 'middleware' depending on your use case
-  }),
+  output: "server",
+  adapter: vercel(),
+  integrations: [react()]
 });
