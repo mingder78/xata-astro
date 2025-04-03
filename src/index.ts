@@ -1,7 +1,14 @@
-// Generated with CLI
-import { getXataClient } from "./xata";
-const xata = getXataClient();
+import { db } from './db/db'; // Import the Kysely instance
 
-const page = await xata.db.users.getPaginated();
-console.log(page.records);
+// Fetch all users
+async function getUsers() {
+  const users = await db
+    .selectFrom('users')
+    .select(['id', 'username'])
+    .execute();
 
+  console.log(users);
+  return users;
+}
+
+getUsers();
