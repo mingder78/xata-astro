@@ -36,3 +36,21 @@ bun run src/index.ts
 Astro comes with [Tailwind](https://tailwindcss.com) support out of the box. This example showcases how to style your Astro project with Tailwind.
 
 For complete setup instructions, please see our [Tailwind Integration Guide](https://docs.astro.build/en/guides/integrations-guide/tailwind).
+
+
+# code structure
+
+```
+my-crud-app/
+├── src/
+│   ├── api/              # Elysia API server
+│   │   ├── db.ts         # Kysely + Xata setup
+│   │   └── server.ts     # Elysia CRUD routes
+│   ├── pages/            # Astro frontend
+│   │   └── index.astro   # Main page with CRUD UI
+│   └── xata.ts           # Xata client (auto-generated)
+├── .env                  # Environment variables
+├── astro.config.mjs      # Astro config
+├── package.json
+└── bun.lockb             # Bun lockfile
+```
