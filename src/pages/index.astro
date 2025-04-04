@@ -1,89 +1,137 @@
 ---
+
 ---
 
-<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CRUD App</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    .user-list { margin-top: 20px; }
-    form { display: flex; gap: 10px; margin-bottom: 20px; }
-    button { padding: 5px 10px; }
-  </style>
-</head>
-<body>
-  <h1>User CRUD</h1>
-
-  <!-- Create Form -->
-  <form id="createForm">
-    <input type="text" id="name" placeholder="Name" required />
-    <input type="email" id="email" placeholder="Email" required />
-    <button type="submit">Add User</button>
-  </form>
-
-  <!-- User List -->
-  <div class="user-list" id="userList"></div>
-
-  <script>
-	const API_URL = './users';
-    const apiUrl = `${API_URL}`;
-    const userList = document.getElementById('userList');
-    const createForm = document.getElementById('createForm');
-
-    // Fetch and display users
-    async function fetchUsers() {
-      const res = await fetch(apiUrl);
-      const users = await res.json();
-      userList.innerHTML = users.map(user => `
-        <div>
-          <strong>${user.id}</strong> (${user.name}) 
-          <button onclick="updateUser('${user.id}')">Edit</button>
-          <button onclick="deleteUser('${user.id}')">Delete</button>
-        </div>
-      `).join('');
-    }
-
-    // Create user
-    createForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const name = document.getElementById('name').value;
-      const email = document.getElementById('email').value;
-      await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email }),
-      });
-      createForm.reset();
-      fetchUsers();
-    });
-
-    // Update user
-    window.updateUser = async (id) => {
-      const name = prompt('New name:');
-      const email = prompt('New email:');
-      if (name && email) {
-        await fetch(`${apiUrl}/${id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email }),
-        });
-        fetchUsers();
-      }
-    };
-
-    // Delete user
-    window.deleteUser = async (id) => {
-      if (confirm('Are you sure?')) {
-        await fetch(`${apiUrl}/${id}`, { method: 'DELETE' });
-        fetchUsers();
-      }
-    };
-
-    // Initial fetch
-    fetchUsers();
-  </script>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Passkey demo</title>
+  </head>
+  <body>
+    <h1>Passkey demo</h1>
+    <a href="https://github.com/pilcrowOnPaper/browser-passkey-demo"
+      >Github repository</a
+    >
+    <p>
+      Passkey demo in the browser built with TypeScript and Astro (vanilla JS).
+      All credentials are stored locally.
+    </p>
+    <h1>
+      <p id="status">Not signed in.</p>
+    </h1>
+    <h2>Sign up</h2>
+    <form id="signup-form">
+      <label for="username">Username</label>
+      <input id="username" name="username" /><br />
+      <button>Sign up with passkeys</button>
+    </form>
+    <h2>Sign in</h2>
+    <form id="login-form">
+      <button>Sign in with passkeys</button>
+    </form>
+    <h2>Stored users</h2>
+    <p>Credential IDs and public keys are encoded in base64url.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>User ID</th>
+          <th>Username</th>
+          <th>Credential ID</th>
+          <th>Public key</th>
+        </tr>
+      </thead>
+      <tbody id="stored-users-tbody"></tbody>
+    </table>
+    <button id="clear-db-button">Clear local storage</button>
+    <p>Make sure to clear your passkeys stored in your device as well.</p>
+  </body>
 </html>
+
+<script>
+  import { signIn, signUp } from "../utils/auth";
+  import { db } from "../utils/db";
+
+  const signupForm = document.getElementById("signup-form") as HTMLFormElement;
+  const loginForm = document.getElementById("login-form") as HTMLFormElement;
+  const statusParagraph = document.getElementById(
+    "status"
+  ) as HTMLParagraphElement;
+  const clearDatabaseButton = document.getElementById(
+    "clear-db-button"
+  ) as HTMLButtonElement;
+  const storedUsersTableBody = document.getElementById(
+    "stored-users-tbody"
+  ) as HTMLTableSectionElement;
+
+  signupForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(signupForm);
+    const username = formData.get("username");
+    if (typeof username !== "string" || username.length < 1) return;
+    const user = await signUp(username);
+    statusParagraph.textContent = `You're signed in as ${user.username} (user ID: ${user.userId}).`;
+  });
+
+  loginForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const user = await signIn();
+    console.log(user);
+    statusParagraph.textContent = `You're signed in as ${user.username} (user ID: ${user.userId}).`;
+  });
+
+  clearDatabaseButton.addEventListener("click", () => {
+    db.clear();
+  });
+
+  displayDatabase(db);
+
+  db.onUpdate(displayDatabase);
+
+  function displayDatabase(currentDb: typeof db): void {
+    for (const child of storedUsersTableBody.children) {
+      child.remove();
+    }
+    for (const entry of currentDb.entries()) {
+      const rowElement = document.createElement("tr");
+      rowElement.append(createTableDataCell(entry.id));
+      rowElement.append(createTableDataCell(entry.username));
+      rowElement.append(createTableDataCell(entry.credential_id));
+      rowElement.append(createTableDataCell(entry.public_key));
+
+      storedUsersTableBody.append(rowElement);
+    }
+  }
+
+  function createTableDataCell(value: string) {
+    const codeElement = document.createElement("code");
+    codeElement.textContent = value;
+    const tableDataCellElement = document.createElement("td");
+    tableDataCellElement.append(codeElement);
+    return tableDataCellElement;
+  }
+</script>
+
+<style>
+  body {
+    padding: 0 2em;
+    width: fit-content;
+  }
+  button,
+  input[type="submit"] {
+    display: block;
+    margin: 1em 0;
+  }
+
+  :global(table, th, td) {
+    text-align: left;
+    border-collapse: collapse;
+    border: 1px solid;
+    white-space: pre;
+  }
+  :global(th, td) {
+    padding: 0.25em 1em;
+  }
+</style>

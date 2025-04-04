@@ -1,7 +1,7 @@
 {
   "name": "xata-astro",
   "type": "module",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
@@ -21,6 +21,7 @@
     "astro": "^5.5.6",
     "canvas-confetti": "^1.9.3",
     "elysia": "^1.2.25",
-    "kysely": "^0.27.6"
+    "kysely": "^0.27.6",
+    "tailwindcss": "^4.1.2"
   }
 }
