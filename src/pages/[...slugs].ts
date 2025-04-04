@@ -44,7 +44,6 @@ const app = new Elysia()
     return {
       isAuthenticated: async () => {
         const cookie = request.headers.get("cookie") || "";
-        console.log(cookie);
         const token = cookie
           .split("; ")
           .find((c) => c.startsWith("token="))
@@ -93,7 +92,6 @@ const app = new Elysia()
         "/login",
         async ({ params, body, jwt, set }) => {
           const { name, password } = body as { name: string; password: string };
-          console.log(name + password);
           const user = await db
             .selectFrom("users")
             .selectAll()
@@ -116,7 +114,7 @@ const app = new Elysia()
           // Set cookie
           set.headers[
             "Set-Cookie"
-          ] = `token=${jwt}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=3600`;
+          ] = `token=${token}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=3600`;
 
           return {
             success: true,
