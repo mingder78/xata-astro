@@ -1,0 +1,18 @@
+{
+  "id": "mig_cvnv4m8bllbustpfl6v0",
+  "parentID": "mig_cvn4abjjvveebe59jb20",
+  "checksum": "1:284ef3689fff461d2573386053089cccc05c75c70c58a945481186b1dc6ebc9d",
+  "operations": [
+    {
+      "addColumn": {
+        "column": {
+          "name": "credential_id",
+          "type": "text",
+          "notNull": true,
+          "defaultValue": "\"\""
+        },
+        "table": "items"
+      }
+    }
+  ]
+}

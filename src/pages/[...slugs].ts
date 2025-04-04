@@ -8,7 +8,7 @@ export const prerender = false;
 // Types for our data models
 const UserSchema = t.Object({
   id: t.Optional(t.Number()),
-  name: t.String(),
+  username: t.String(),
   password: t.String(),
   email: t.String(),
 });
@@ -22,7 +22,7 @@ const ItemSchema = t.Object({
 });
 
 const LoginSchema = t.Object({
-  name: t.String(),
+  username: t.String(),
   password: t.String(),
 });
 
@@ -48,7 +48,6 @@ const app = new Elysia()
           .split("; ")
           .find((c) => c.startsWith("token="))
           ?.split("=")[1];
-        console.log(token);
         const payload = await jwt.verify(token);
 
         if (!payload) {
@@ -66,15 +65,15 @@ const app = new Elysia()
       .post(
         "/register",
         async ({ body, set }) => {
-          const { name, password, email } = body as {
-            name: string;
+          const { username, password, email } = body as {
+            username: string;
             password: string;
             email;
             string;
           };
           const result = await db
             .insertInto("users")
-            .values({ name, password, email })
+            .values({ username, password, email })
             .execute();
           set.status = 201;
           return { message: "User created", id: result[0].insertId };
@@ -91,11 +90,14 @@ const app = new Elysia()
       .post(
         "/login",
         async ({ params, body, jwt, set }) => {
-          const { name, password } = body as { name: string; password: string };
+          const { username, password } = body as {
+            username: string;
+            password: string;
+          };
           const user = await db
             .selectFrom("users")
             .selectAll()
-            .where("name", "=", name)
+            .where("username", "=", username)
             .where("password", "=", password)
             .executeTakeFirst();
 
@@ -108,7 +110,7 @@ const app = new Elysia()
 
           const token = await jwt.sign({
             id: user.id!, // Add '!' to assert that 'user' is not null
-            name: user.name!, // Add '!' to assert that 'user' is not null
+            username: user.username!, // Add '!' to assert that 'user' is not null
           });
 
           // Set cookie
@@ -133,10 +135,10 @@ const app = new Elysia()
   )
   // CREATE: Add a user
   .post("/users", async ({ body, set }) => {
-    const { name, email } = body as { name: string; email: string };
+    const { username, email } = body as { username: string; email: string };
     const result = await db
       .insertInto("users")
-      .values({ name, email })
+      .values({ username, email })
       .execute();
     set.status = 201;
     return { message: "User created", id: result[0].insertId };
@@ -162,10 +164,10 @@ const app = new Elysia()
   })
   // UPDATE: Update a user by ID
   .put("/users/:id", async ({ params, body }) => {
-    const { name, email } = body as { name: string; email: string };
+    const { username, email } = body as { username: string; email: string };
     const result = await db
       .updateTable("users")
-      .set({ name, email })
+      .set({ username, email })
       .where("id", "=", params.id)
       .execute();
     if (result[0].numUpdatedRows === 0n) {

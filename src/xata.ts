@@ -10,9 +10,16 @@ const tables = [
   {
     name: "users",
     columns: [
-      { name: "name", type: "string", unique: true },
+      { name: "username", type: "string", unique: true },
       { name: "password", type: "string" },
       { name: "email", type: "text" },
+      {
+        name: "credential_id",
+        type: "text",
+        notNull: true,
+        defaultValue: '""',
+      },
+      { name: "public_key", type: "text", notNull: true, defaultValue: "''\"" },
     ],
     revLinks: [{ column: "user", table: "items" }],
   },

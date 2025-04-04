@@ -1,0 +1,13 @@
+{
+  "id": "mig_cvnv4vobllbustpfl710",
+  "parentID": "mig_cvnv4s0bllbustpfl700",
+  "checksum": "1:9b1c3ac3523da13fd12b313d0a650af34b3a5e7e7282c8a8d02de96e93a6d588",
+  "operations": [
+    {
+      "removeColumn": {
+        "column": "credential_id",
+        "table": "items"
+      }
+    }
+  ]
+}

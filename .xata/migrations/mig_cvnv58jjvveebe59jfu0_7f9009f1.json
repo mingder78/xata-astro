@@ -1,0 +1,13 @@
+{
+  "id": "mig_cvnv58jjvveebe59jfu0",
+  "parentID": "mig_cvnv4vobllbustpfl710",
+  "checksum": "1:7f9009f11806a9fe10c8bc88c422e60df6dff226e593b8eb32e5a7ff626a73ef",
+  "operations": [
+    {
+      "removeColumn": {
+        "column": "public_key",
+        "table": "items"
+      }
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "id": "mig_cvnv4s0bllbustpfl700",
+  "parentID": "mig_cvnv4m8bllbustpfl6v0",
+  "checksum": "1:6b659b72b6d51a2b5ca9c4c59229791f444d1bba992eceee404918e2c755f6f1",
+  "operations": [
+    {
+      "addColumn": {
+        "column": {
+          "name": "public_key",
+          "type": "text",
+          "notNull": true,
+          "defaultValue": "\"\""
+        },
+        "table": "items"
+      }
+    }
+  ]
+}

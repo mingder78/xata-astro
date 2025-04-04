@@ -13,7 +13,7 @@
   <body>
     <h1>Passkey demo</h1>
     <a href="https://github.com/mingder78/xata-astro">Github repository</a><p>
-    </p>* Frontend original from 
+    </p>* Frontend original from
     <a href="https://github.com/pilcrowOnPaper/browser-passkey-demo"
       >pilcrowonpaper.</a
     >
@@ -80,7 +80,6 @@
   loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const user = await signIn();
-    console.log(user);
     statusParagraph.textContent = `You're signed in as ${user.username} (user ID: ${user.userId}).`;
   });
 

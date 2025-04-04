@@ -1,0 +1,18 @@
+{
+  "id": "mig_cvnv5mrjvveebe59jfv0",
+  "parentID": "mig_cvnv5jgbllbustpfl730",
+  "checksum": "1:fcc51b9eeada98f10522d17e782ce5cbc891f5057a5b6185f0039f443dc7dbcd",
+  "operations": [
+    {
+      "addColumn": {
+        "column": {
+          "name": "public_key",
+          "type": "text",
+          "notNull": true,
+          "defaultValue": "''\""
+        },
+        "table": "users"
+      }
+    }
+  ]
+}
