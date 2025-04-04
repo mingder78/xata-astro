@@ -1,71 +1,191 @@
 // pages/[...slugs].ts
-import { Elysia } from "elysia";
+import { Elysia, t } from "elysia";
 import { swagger } from "@elysiajs/swagger";
+import { jwt } from "@elysiajs/jwt";
 import { db } from "../db/db";
 
 export const prerender = false;
+// Types for our data models
+const UserSchema = t.Object({
+  id: t.Optional(t.Number()),
+  name: t.String(),
+  password: t.String(),
+  email: t.String(),
+});
+
+const ItemSchema = t.Object({
+  id: t.Optional(t.Number()),
+  name: t.String(),
+  description: t.Optional(t.String()),
+  user_id: t.Optional(t.Number()),
+  created_at: t.Optional(t.String()),
+});
+
+const LoginSchema = t.Object({
+  name: t.String(),
+  password: t.String(),
+});
 
 async function getUsers() {
-    const users = await db
-      .selectFrom('users')
-      .selectAll()
-      .execute();
-    return users;
-  }
-  
+  const users = await db.selectFrom("users").selectAll().execute();
+  return users;
+}
+
 const app = new Elysia()
   .use(swagger())
-    // CREATE: Add a user
-    .post('/users', async ({ body, set }) => {
-      const { name, email } = body as { name: string; email: string };
-      const result = await db
-        .insertInto('users')
-        .values({ name, email })
-        .execute();
-      set.status = 201;
-      return { message: 'User created', id: result[0].insertId };
+  .use(
+    jwt({
+      name: "jwt",
+      secret: import.meta.env.JWT_SECRET,
     })
-  .get('/users', async () => {
+  )
+  // Define auth middleware
+  .derive(({ jwt, request, set }) => {
+    return {
+      isAuthenticated: async () => {
+        const cookie = request.headers.get("cookie") || "";
+        console.log(cookie);
+        const token = cookie
+          .split("; ")
+          .find((c) => c.startsWith("token="))
+          ?.split("=")[1];
+        console.log(token);
+        const payload = await jwt.verify(token);
+
+        if (!payload) {
+          set.status = 401;
+          return false;
+        }
+
+        return payload;
+      },
+    };
+  })
+  // Auth routes
+  .group("/auth", (app) =>
+    app
+      .post(
+        "/register",
+        async ({ body, set }) => {
+          const { name, password, email } = body as {
+            name: string;
+            password: string;
+            email;
+            string;
+          };
+          const result = await db
+            .insertInto("users")
+            .values({ name, password, email })
+            .execute();
+          set.status = 201;
+          return { message: "User created", id: result[0].insertId };
+        },
+        {
+          body: UserSchema,
+          detail: {
+            tags: ["Auth"],
+            summary: "Register a new user",
+            description: "Create a new user account",
+          },
+        }
+      )
+      .post(
+        "/login",
+        async ({ params, body, jwt, set }) => {
+          const { name, password } = body as { name: string; password: string };
+          console.log(name + password);
+          const user = await db
+            .selectFrom("users")
+            .selectAll()
+            .where("name", "=", name)
+            .where("password", "=", password)
+            .executeTakeFirst();
+
+          if (!user) {
+            return {
+              success: false,
+              message: "Invalid credentials",
+            };
+          }
+
+          const token = await jwt.sign({
+            id: user.id!, // Add '!' to assert that 'user' is not null
+            name: user.name!, // Add '!' to assert that 'user' is not null
+          });
+
+          // Set cookie
+          set.headers[
+            "Set-Cookie"
+          ] = `token=${jwt}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=3600`;
+
+          return {
+            success: true,
+            message: "Login successful",
+          };
+        },
+        {
+          body: LoginSchema,
+          detail: {
+            tags: ["Auth"],
+            summary: "User login",
+            description: "Authenticate a user and generate an access token",
+          },
+        }
+      )
+  )
+  // CREATE: Add a user
+  .post("/users", async ({ body, set }) => {
+    const { name, email } = body as { name: string; email: string };
+    const result = await db
+      .insertInto("users")
+      .values({ name, email })
+      .execute();
+    set.status = 201;
+    return { message: "User created", id: result[0].insertId };
+  })
+  .get("/users", async ({ isAuthenticated }) => {
+    const auth = await isAuthenticated();
+    if (!auth) return { error: "Unauthorized" };
+
     const users = await getUsers();
     return users;
   })
-   // READ: Get a user by ID
-   .get('/users/:id', async ({ params }) => {
+  // READ: Get a user by ID
+  .get("/users/:id", async ({ params }) => {
     const user = await db
-      .selectFrom('users')
+      .selectFrom("users")
       .selectAll()
-      .where('id', '=', params.id)
+      .where("id", "=", params.id)
       .executeTakeFirst();
     if (!user) {
-      return { error: 'User not found' };
+      return { error: "User not found" };
     }
     return user;
   })
-    // UPDATE: Update a user by ID
-    .put('/users/:id', async ({ params, body }) => {
-      const { name, email } = body as { name: string; email: string };
-      const result = await db
-        .updateTable('users')
-        .set({ name, email })
-        .where('id', '=', params.id)
-        .execute();
-      if (result[0].numUpdatedRows === 0n) {
-        return { error: 'User not found' };
-      }
-      return { message: 'User updated' };
-    })
-      // DELETE: Delete a user by ID
-  .delete('/users/:id', async ({ params }) => {
+  // UPDATE: Update a user by ID
+  .put("/users/:id", async ({ params, body }) => {
+    const { name, email } = body as { name: string; email: string };
     const result = await db
-      .deleteFrom('users')
-      .where('id', '=', params.id)
+      .updateTable("users")
+      .set({ name, email })
+      .where("id", "=", params.id)
+      .execute();
+    if (result[0].numUpdatedRows === 0n) {
+      return { error: "User not found" };
+    }
+    return { message: "User updated" };
+  })
+  // DELETE: Delete a user by ID
+  .delete("/users/:id", async ({ params }) => {
+    const result = await db
+      .deleteFrom("users")
+      .where("id", "=", params.id)
       .execute();
     if (result[0].numDeletedRows === 0n) {
-      return { error: 'User not found' };
+      return { error: "User not found" };
     }
-    return { message: 'User deleted' };
-  })
-
+    return { message: "User deleted" };
+  });
 
 export type App = typeof app;
 
