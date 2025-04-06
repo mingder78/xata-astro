@@ -9,6 +9,17 @@ type User = {
 
 export async function signUp(username: string): Promise<User> {
 	// should be handled in server - start
+	try {
+		const response = await fetch(`/webauthn/getuserbyname/${username}`, {
+		  headers: {
+			Accept: "application/json",
+		  },
+		});
+		const data = await response.json();
+		console.log(data);
+	  } catch (error) {
+		console.log(error);
+	  }
 	const userExists = !!db.getByUsername(username);
 	if (userExists) throw new Error("Username already used");
 	// recommend minimum 16 bytes

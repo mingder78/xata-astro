@@ -54,11 +54,24 @@ const app = new Elysia()
           set.status = 401;
           return false;
         }
-
         return payload;
       },
     };
   })
+  // Auth routes
+  .group("/webauthn", (app) =>
+    app.get("/getuserbyname/:username", async ({ params }) => {
+      const user = await db
+        .selectFrom("users")
+        .selectAll()
+        .where("username", "=", params.username)
+        .executeTakeFirst();
+      if (!user) {
+        return false;
+      }
+      return user;
+    })
+  )
   // Auth routes
   .group("/auth", (app) =>
     app
@@ -68,8 +81,7 @@ const app = new Elysia()
           const { username, password, email } = body as {
             username: string;
             password: string;
-            email;
-            string;
+            email: string;
           };
           const result = await db
             .insertInto("users")
